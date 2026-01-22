@@ -99,12 +99,12 @@ const CryptoShibaRun = () => {
 
                         <div
                             style={{
-                                width: "50px",
+                                width: "36px",
                                 height: "50px",
                                 backgroundImage: `url(${SHIBA_SPRITESHEET})`,
                                 backgroundRepeat: "no-repeat",
                                 animation: "dance 0.6s steps(1) infinite",
-                                backgroundSize: "300px 50px",
+                                backgroundSize: "216px 50px",
                                 margin: "10px auto",
                                 imageRendering: "pixelated",
                             }}
@@ -113,8 +113,8 @@ const CryptoShibaRun = () => {
                         <style>
                             {`
                                 @keyframes dance {
-                                0% { background-position: -200px 0; }
-                                50% { background-position: -250px 0; }
+                                0% { background-position: -144px 0; }
+                                50% { background-position: -180px 0; }
                                 }
                             `}
                         </style>

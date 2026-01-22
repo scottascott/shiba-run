@@ -117,17 +117,17 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
       // Sprite Selection
       let spriteX = 0; 
       if (gameState === 'GAME_OVER') {
-        spriteX = 150; 
+        spriteX = 108; 
       } else if (shibaY.current < GROUND_Y - SHIBA_HEIGHT) {
-        spriteX = 100; 
+        spriteX = 72; 
       } else {
         const runFrame = Math.floor(frameCount.current / 10) % 2; 
-        spriteX = runFrame * 50; 
+        spriteX = runFrame * 36; 
       }
 
       // Draw Shiba
       if (spritesRef.current) {
-        ctx.drawImage(spritesRef.current, spriteX, 0, 50, 50, 50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
+        ctx.drawImage(spritesRef.current, spriteX, 0, 36, 50, 50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
       } else {
         ctx.fillStyle = 'red';
         ctx.fillRect(50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
