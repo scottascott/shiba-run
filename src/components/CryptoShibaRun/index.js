@@ -4,8 +4,9 @@ import { GAME_WIDTH } from "./Constants";
 import { SHIBA_SPRITESHEET } from "./Assets";
 
 const CryptoShibaRun = () => {
-    const [gameState, setGameState] = useState("IDLE"); // 'IDLE', 'PLAYING', 'GAME_OVER'
-    const [score, setScore] = useState(0);
+    const [gameState, setGameState] = useState("IDLE");
+    const [score, setScore] = useState(0);      // Final Score (Game Over)
+    const [liveScore, setLiveScore] = useState(0); // Live Score (Playing)
     const [highScore, setHighScore] = useState(0);
 
     const handleGameOver = (finalScore) => {
@@ -14,24 +15,20 @@ const CryptoShibaRun = () => {
             setHighScore(finalScore);
         }
     };
+    
     const [isTouch, setIsTouch] = useState(false);
 
     useEffect(() => {
-        // Check if device supports touch
         setIsTouch("ontouchstart" in window || navigator.maxTouchPoints > 0);
     }, []);
 
     return (
         <div
             style={{
-                // --- RESPONSIVE CONTAINER ---
                 width: "100%",
                 maxWidth: GAME_WIDTH,
-                // Enforce a minimum height so UI never overflows on mobile
                 minHeight: "300px",
-                // Keep the aspect ratio on Desktop, but allow minHeight to override on Mobile
                 aspectRatio: "800/300",
-
                 position: "relative",
                 border: "1px solid #333",
                 backgroundColor: "#111",
@@ -39,18 +36,44 @@ const CryptoShibaRun = () => {
                 overflow: "hidden",
                 fontFamily: "monospace",
                 userSelect: "none",
-
-                // Vertical Centering (for when container is taller than canvas on mobile)
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
             }}
         >
-            <CanvasLayer gameState={gameState} setGameState={setGameState} onGameOver={handleGameOver} />
+            <CanvasLayer 
+                gameState={gameState} 
+                setGameState={setGameState} 
+                onGameOver={handleGameOver}
+                onScoreUpdate={setLiveScore} // Connect the live score
+            />
+
+            {/* --- NEW: LIVE SCORE HUD (Only visible when PLAYING) --- */}
+            {gameState === 'PLAYING' && (
+                <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    padding: '5px 12px',
+                    borderRadius: '8px',
+                    pointerEvents: 'none', // Let clicks pass through to the game
+                    border: '1px solid #333'
+                }}>
+                    <p style={{
+                        color: '#00ff00', 
+                        margin: 0, 
+                        fontSize: '20px', // This stays BIG on mobile!
+                        fontWeight: 'bold',
+                        letterSpacing: '1px'
+                    }}>
+                        ₿ {liveScore}
+                    </p>
+                </div>
+            )}
 
             {/* --- UI OVERLAY --- */}
 
-            {/* 1. START SCREEN */}
             {gameState === "IDLE" && (
                 <div style={overlayStyle}>
                     <div style={cardStyle}>
@@ -60,7 +83,7 @@ const CryptoShibaRun = () => {
                                 color: "#fff",
                                 marginTop: "10px",
                                 fontSize: "14px",
-                                animation: "blink 1.5s infinite", // Added a subtle blink to make it inviting
+                                animation: "blink 1.5s infinite",
                             }}
                         >
                             {isTouch ? "TAP SCREEN TO START" : "PRESS SPACE TO START"}
@@ -69,29 +92,24 @@ const CryptoShibaRun = () => {
                 </div>
             )}
 
-            {/* 2. GAME OVER / SCORE SCREEN */}
             {gameState === "GAME_OVER" && (
                 <div style={overlayStyle}>
                     <div style={cardStyle}>
                         <h2 style={{ color: "#ff4444", fontSize: "clamp(24px, 6vw, 30px)", margin: 0 }}>GOOD JOB!</h2>
 
-                        {/* --- DANCING SHIBA ANIMATION --- */}
-                        {/* This uses the sprite sheet as a background and flips between 2 frames */}
                         <div
                             style={{
                                 width: "50px",
                                 height: "50px",
                                 backgroundImage: `url(${SHIBA_SPRITESHEET})`,
                                 backgroundRepeat: "no-repeat",
-                                // Animation: Toggle between Frame 4 (-200px) and Frame 5 (-250px)
                                 animation: "dance 0.6s steps(1) infinite",
-                                backgroundSize: "300px 50px", // Full width of sprite sheet (6 frames * 50px)
+                                backgroundSize: "300px 50px",
                                 margin: "10px auto",
                                 imageRendering: "pixelated",
                             }}
                         />
 
-                        {/* Inject the keyframes strictly for this component */}
                         <style>
                             {`
                                 @keyframes dance {
@@ -100,28 +118,25 @@ const CryptoShibaRun = () => {
                                 }
                             `}
                         </style>
-                        {/* ------------------------------- */}
+
                         <div
                             style={{
                                 margin: "20px 0",
                                 width: "100%",
                                 display: "flex",
-                                flexDirection: "row", // Align items horizontally
-                                justifyContent: "center", // Center the whole block
-                                alignItems: "center", // Vertical alignment
-                                gap: "20px", // Space between columns
+                                flexDirection: "row",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "20px",
                             }}
                         >
-                            {/* LEFT COLUMN: Current Score */}
                             <div style={{ textAlign: "center" }}>
                                 <p style={{ color: "#888", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>PORTFOLIO VALUE</p>
                                 <p style={{ color: "#fff", fontSize: "20px", margin: 0, fontWeight: "bold" }}>₿ {score}</p>
                             </div>
 
-                            {/* CENTER: Vertical Divider */}
                             <div style={{ width: "1px", height: "40px", backgroundColor: "#333" }}></div>
 
-                            {/* RIGHT COLUMN: ATH */}
                             <div style={{ textAlign: "center" }}>
                                 <p style={{ color: "#fbbf24", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>ATH (ALL TIME HIGH)</p>
                                 <p style={{ color: "#fbbf24", fontSize: "20px", margin: 0, fontWeight: "bold" }}>₿ {highScore}</p>
