@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import CanvasLayer from './CanvasLayer';
 import { GAME_WIDTH } from './Constants';
+import { SHIBA_SPRITESHEET } from './Assets';
 
 const CryptoShibaRun = () => {
-  const [gameState, setGameState] = useState('IDLE'); 
+  const [gameState, setGameState] = useState('IDLE'); // 'IDLE', 'PLAYING', 'GAME_OVER'
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
 
@@ -17,7 +18,7 @@ const CryptoShibaRun = () => {
   return (
     <div 
       style={{ 
-        // --- RESPONSIVE LAYOUT FIX ---
+        // --- RESPONSIVE CONTAINER ---
         width: '100%', 
         maxWidth: GAME_WIDTH, 
         // Enforce a minimum height so UI never overflows on mobile
@@ -47,6 +48,7 @@ const CryptoShibaRun = () => {
       
       {/* --- UI OVERLAY --- */}
       
+      {/* 1. START SCREEN */}
       {gameState === 'IDLE' && (
         <div style={overlayStyle}>
           <div style={cardStyle}>
@@ -56,12 +58,38 @@ const CryptoShibaRun = () => {
         </div>
       )}
 
+      {/* 2. GAME OVER / SCORE SCREEN */}
       {gameState === 'GAME_OVER' && (
         <div style={overlayStyle}>
           <div style={cardStyle}>
             <h2 style={{color: '#ff4444', fontSize: 'clamp(24px, 6vw, 30px)', margin: 0}}>MARKET CRASH!</h2>
             
-            <div style={{margin: '15px 0', textAlign: 'center'}}>
+            {/* --- DANCING SHIBA ANIMATION --- */}
+            {/* This uses the sprite sheet as a background and flips between 2 frames */}
+            <div style={{
+              width: '50px',
+              height: '50px',
+              backgroundImage: `url(${SHIBA_SPRITESHEET})`,
+              backgroundRepeat: 'no-repeat',
+              // Animation: Toggle between Frame 4 (-200px) and Frame 5 (-250px)
+              animation: 'dance 0.6s steps(1) infinite', 
+              backgroundSize: '300px 50px', // Full width of sprite sheet (6 frames * 50px)
+              margin: '10px auto',
+              imageRendering: 'pixelated' 
+            }} />
+            
+            {/* Inject the keyframes strictly for this component */}
+            <style>
+              {`
+                @keyframes dance {
+                  0% { background-position: -200px 0; }
+                  50% { background-position: -250px 0; }
+                }
+              `}
+            </style>
+            {/* ------------------------------- */}
+
+            <div style={{margin: '15px 0', textAlign: 'center', width: '100%'}}>
               <p style={{color: '#888', margin: '5px', fontSize: '12px'}}>PORTFOLIO VALUE</p>
               <p style={{color: '#fff', fontSize: '24px', margin: '5px'}}>₿ {score}</p>
               
@@ -92,18 +120,17 @@ const overlayStyle = {
   left: 0, 
   width: '100%', 
   height: '100%', 
-  // Z-Index ensures it floats above the canvas
   zIndex: 10,
   display: 'flex', 
   justifyContent: 'center', 
   alignItems: 'center', 
-  backgroundColor: 'rgba(0,0,0,0.8)', // Slightly darker for better readability
+  backgroundColor: 'rgba(0,0,0,0.8)', 
   padding: '20px', 
   boxSizing: 'border-box'
 };
 
 const cardStyle = {
-  backgroundColor: '#1a1a1a', // Solid background to prevent see-through mess
+  backgroundColor: '#1a1a1a', 
   padding: '20px',
   borderRadius: '12px',
   border: '1px solid #444',
@@ -112,7 +139,7 @@ const cardStyle = {
   flexDirection: 'column',
   alignItems: 'center',
   width: '100%',
-  maxWidth: '300px', // Prevents it from getting too wide on desktop
+  maxWidth: '300px', 
   boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
 };
 
