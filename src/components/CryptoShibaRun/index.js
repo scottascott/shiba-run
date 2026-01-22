@@ -3,7 +3,6 @@ import CanvasLayer from './CanvasLayer';
 import { GAME_WIDTH, GAME_HEIGHT } from './Constants';
 
 const CryptoShibaRun = () => {
-  // Simple state to start with
   const [gameState, setGameState] = useState('IDLE'); // 'IDLE', 'PLAYING', 'GAME_OVER'
 
   return (
@@ -13,15 +12,17 @@ const CryptoShibaRun = () => {
         height: GAME_HEIGHT, 
         position: 'relative', 
         border: '1px solid #333',
-        backgroundColor: '#111', // Dark crypto theme background
-        margin: '0 auto'
+        backgroundColor: '#111', 
+        margin: '0 auto',
+        overflow: 'hidden'
       }}
     >
-      <CanvasLayer gameState={gameState} />
+      <CanvasLayer gameState={gameState} setGameState={setGameState} />
       
-      {/* Temporary UI to prove it works */}
-      <div style={{ position: 'absolute', top: 10, left: 10, color: 'white' }}>
-        <p>Status: {gameState}</p>
+      {/* Overlay UI */}
+      <div style={{ position: 'absolute', top: 10, left: 10, color: '#0f0', fontFamily: 'monospace' }}>
+        <p>STATUS: {gameState}</p>
+        {gameState === 'IDLE' && <p>PRESS SPACE TO START</p>}
       </div>
     </div>
   );
