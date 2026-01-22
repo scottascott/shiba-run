@@ -1,18 +1,21 @@
 import React, { useRef, useEffect } from 'react';
-import { GAME_WIDTH, GAME_HEIGHT, GRAVITY, JUMP_STRENGTH, GAME_SPEED_START, GROUND_Y } from './Constants';
+import { 
+  GAME_WIDTH, GAME_HEIGHT, GRAVITY, JUMP_STRENGTH, GAME_SPEED_START, GROUND_Y,
+  SHIBA_WIDTH, SHIBA_HEIGHT, OBSTACLE_WIDTH, OBSTACLE_HEIGHT 
+} from './Constants';
 import { SHIBA_SPRITESHEET } from './Assets';
 import { addInputListener } from './utils/inputManager';
 
-const CanvasLayer = ({ gameState, setGameState }) => {
+const CanvasLayer = ({ gameState, setGameState, onGameOver }) => {
   const canvasRef = useRef(null);
   
-  // Physics State
-  const shibaY = useRef(GROUND_Y - 50);
+  // Mutable Game State
+  const shibaY = useRef(GROUND_Y - SHIBA_HEIGHT);
   const shibaVelocity = useRef(0);
-  const obstacleX = useRef(GAME_WIDTH); 
+  const obstacleX = useRef(GAME_WIDTH);
   const score = useRef(0);
+  const gameSpeed = useRef(GAME_SPEED_START);
 
-  // Assets
   const spritesRef = useRef(null);
 
   useEffect(() => {
@@ -21,53 +24,65 @@ const CanvasLayer = ({ gameState, setGameState }) => {
     
     // Retina/High-DPI Fix
     const dpr = window.devicePixelRatio || 1;
-    if (canvas.width !== GAME_WIDTH * dpr) {
-      canvas.width = GAME_WIDTH * dpr;
-      canvas.height = GAME_HEIGHT * dpr;
-      canvas.style.width = `${GAME_WIDTH}px`;
-      canvas.style.height = `${GAME_HEIGHT}px`;
-      ctx.scale(dpr, dpr);
-    }
+    
+    // Internal Resolution (Physics coordinates) - ALWAYS 800x300
+    canvas.width = GAME_WIDTH * dpr;
+    canvas.height = GAME_HEIGHT * dpr;
+    
+    // Scale all drawing operations by dpr
+    ctx.scale(dpr, dpr);
+
+    // NOTE: We REMOVED canvas.style.width assignment here. 
+    // We let CSS handle the visual size now.
 
     let animationFrameId;
 
-    // --- 1. The Game Loop ---
-    const loop = () => {
-      if (gameState !== 'PLAYING') return;
-
-      updatePhysics();
-      draw();
-      animationFrameId = requestAnimationFrame(loop);
-    };
-
-    // --- 2. Physics Logic ---
+    // --- Physics Logic ---
     const updatePhysics = () => {
-      // Gravity
+      // 1. Gravity & Jump
       shibaVelocity.current += GRAVITY;
       shibaY.current += shibaVelocity.current;
 
-      // Floor Collision
-      if (shibaY.current >= GROUND_Y - 50) {
-        shibaY.current = GROUND_Y - 50;
+      if (shibaY.current >= GROUND_Y - SHIBA_HEIGHT) {
+        shibaY.current = GROUND_Y - SHIBA_HEIGHT;
         shibaVelocity.current = 0;
       }
 
-      // Obstacle Movement
-      obstacleX.current -= GAME_SPEED_START;
+      // 2. Obstacle Movement
+      obstacleX.current -= gameSpeed.current;
       
-      // Reset Obstacle if off-screen
-      if (obstacleX.current < -50) {
-        obstacleX.current = GAME_WIDTH;
-        score.current += 1;
+      // Reset Obstacle & Increase Score
+      if (obstacleX.current < -OBSTACLE_WIDTH) {
+        obstacleX.current = GAME_WIDTH + Math.random() * 200; 
+        if (score.current > 0 && score.current % 500 === 0) {
+           gameSpeed.current += 0.5;
+        }
+      }
+
+      // 3. Score
+      score.current += 1; 
+
+      // 4. Collision
+      if (
+        50 < obstacleX.current + OBSTACLE_WIDTH &&
+        50 + SHIBA_WIDTH > obstacleX.current &&
+        shibaY.current < (GROUND_Y - OBSTACLE_HEIGHT) + OBSTACLE_HEIGHT &&
+        shibaY.current + SHIBA_HEIGHT > GROUND_Y - OBSTACLE_HEIGHT
+      ) {
+        handleCollision();
       }
     };
 
-    // --- 3. Drawing Logic ---
+    const handleCollision = () => {
+      setGameState('GAME_OVER');
+      if (onGameOver) onGameOver(score.current);
+    };
+
+    // --- Drawing Logic ---
     const draw = () => {
-      // Clear Screen
       ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-      // A. Draw Floor
+      // Floor
       ctx.beginPath();
       ctx.moveTo(0, GROUND_Y);
       ctx.lineTo(GAME_WIDTH, GROUND_Y);
@@ -75,63 +90,76 @@ const CanvasLayer = ({ gameState, setGameState }) => {
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // B. Draw Obstacle (Red Candle)
+      // Obstacle
       ctx.fillStyle = '#ff0000';
-      ctx.fillRect(obstacleX.current, GROUND_Y - 40, 20, 40);
+      ctx.fillRect(obstacleX.current, GROUND_Y - OBSTACLE_HEIGHT, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
 
-      // C. Draw Shiba
+      // Shiba
       if (spritesRef.current) {
-        // Draw Sprite if loaded
-        ctx.drawImage(spritesRef.current, 0, 0, 50, 50, 50, shibaY.current, 50, 50);
+        ctx.drawImage(spritesRef.current, 0, 0, 50, 50, 50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
       } else {
-        // FALLBACK: Draw Red Square if sprite missing/loading
-        ctx.fillStyle = 'red'; // Shiba Color
-        ctx.fillRect(50, shibaY.current, 50, 50);
+        ctx.fillStyle = 'red';
+        ctx.fillRect(50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
       }
+
+      // Live Score - Moved slightly left to ensure visibility on small screens
+      ctx.fillStyle = '#00ff00';
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText(`₿ ${score.current}`, GAME_WIDTH - 120, 30); 
     };
 
-    // --- 4. Initialization ---
+    const loop = () => {
+      if (gameState !== 'PLAYING') return;
+      updatePhysics();
+      draw();
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    // --- Initialization ---
     const init = async () => {
-      // Load assets
       if (!spritesRef.current) {
         try {
           const response = await fetch(SHIBA_SPRITESHEET);
           const blob = await response.blob();
           spritesRef.current = await createImageBitmap(blob);
-        } catch (e) {
-          console.warn("Sprite load failed, using fallback square:", e);
-        }
+        } catch (e) { console.warn("Load failed", e); }
       }
-      
-      // Force an initial draw so we see the "Idle" state
-      draw();
 
       if (gameState === 'PLAYING') {
+        // RESET
+        shibaY.current = GROUND_Y - SHIBA_HEIGHT;
+        shibaVelocity.current = 0;
+        obstacleX.current = GAME_WIDTH;
+        score.current = 0;
+        gameSpeed.current = GAME_SPEED_START;
         loop();
+      } else if (gameState === 'GAME_OVER') {
+        draw();
+      } else {
+        draw(); 
       }
     };
 
     init();
-
     return () => cancelAnimationFrame(animationFrameId);
-  }, [gameState]);
+  }, [gameState]); 
 
-  // Input Handling
+  // --- Inputs ---
   useEffect(() => {
     const handleJump = () => {
       if (gameState === 'PLAYING') {
-        if (shibaY.current === GROUND_Y - 50) {
+        if (shibaY.current === GROUND_Y - SHIBA_HEIGHT) {
           shibaVelocity.current = JUMP_STRENGTH;
         }
-      } else if (gameState === 'IDLE') {
+      } else if (gameState === 'IDLE' || gameState === 'GAME_OVER') {
         setGameState('PLAYING');
       }
     };
-
     return addInputListener(handleJump);
   }, [gameState, setGameState]);
 
-  return <canvas ref={canvasRef} />;
+  // CSS Scaling happens here
+  return <canvas ref={canvasRef} style={{ width: '100%', height: 'auto', display: 'block' }} />;
 };
 
 export default CanvasLayer;
