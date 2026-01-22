@@ -138,7 +138,7 @@ const CryptoShibaRun = () => {
                             <div style={{ width: "1px", height: "40px", backgroundColor: "#333" }}></div>
 
                             <div style={{ textAlign: "center" }}>
-                                <p style={{ color: "#fbbf24", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>ATH (ALL TIME HIGH)</p>
+                                <p style={{ color: "#fbbf24", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>MY RECORD</p>
                                 <p style={{ color: "#fbbf24", fontSize: "20px", margin: 0, fontWeight: "bold" }}>₿ {highScore}</p>
                             </div>
                         </div>

@@ -15,10 +15,13 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
   const obstacleX = useRef(GAME_WIDTH);
   const score = useRef(0);
   const gameSpeed = useRef(GAME_SPEED_START);
+  
+  // NEW: Track the ground movement
+  const groundOffset = useRef(0);
+
   const frameCount = useRef(0); 
   const spritesRef = useRef(null);
 
-  // Keep a ref to the callback to avoid re-running the effect
   const onScoreUpdateRef = useRef(onScoreUpdate);
   useEffect(() => {
     onScoreUpdateRef.current = onScoreUpdate;
@@ -55,18 +58,21 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
         }
       }
 
-      // 3. Score
+      // 3. Move Ground (Sync with speed)
+      // Increasing the offset moves the dash pattern to the Left
+      groundOffset.current += gameSpeed.current;
+
+      // 4. Score
       score.current += 1; 
       
-      // NEW: Send score to UI every 10 frames (prevents lag)
       if (frameCount.current % 10 === 0 && onScoreUpdateRef.current) {
         onScoreUpdateRef.current(score.current);
       }
       
-      // 4. Animation
+      // 5. Animation
       frameCount.current += 1;
 
-      // 5. Collision
+      // 6. Collision
       if (
         50 < obstacleX.current + OBSTACLE_WIDTH &&
         50 + SHIBA_WIDTH > obstacleX.current &&
@@ -85,13 +91,24 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
     const draw = () => {
       ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-      // Floor
+      // --- MOVING FLOOR ---
       ctx.beginPath();
       ctx.moveTo(0, GROUND_Y);
       ctx.lineTo(GAME_WIDTH, GROUND_Y);
-      ctx.strokeStyle = '#00ff00';
+      
+      ctx.strokeStyle = '#555'; 
       ctx.lineWidth = 2;
+      ctx.setLineDash([5, 10]); 
+      
+      // Apply the animation offset here
+      ctx.lineDashOffset = groundOffset.current;
+      
       ctx.stroke();
+      
+      // Reset dash settings so other things draw normally
+      ctx.lineDashOffset = 0;
+      ctx.setLineDash([]); 
+      // --------------------
 
       // Obstacle
       ctx.fillStyle = '#ff0000';
@@ -115,8 +132,6 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
         ctx.fillStyle = 'red';
         ctx.fillRect(50, shibaY.current, SHIBA_WIDTH, SHIBA_HEIGHT);
       }
-
-      // REMOVED: ctx.fillText (Moved to HTML/CSS)
     };
 
     const loop = () => {
@@ -136,14 +151,16 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
       }
 
       if (gameState === 'PLAYING') {
-        // RESET
         shibaY.current = GROUND_Y - SHIBA_HEIGHT;
         shibaVelocity.current = 0;
         obstacleX.current = GAME_WIDTH;
         score.current = 0;
         gameSpeed.current = GAME_SPEED_START;
         frameCount.current = 0;
-        // Reset UI score immediately
+        
+        // Reset Ground Position
+        groundOffset.current = 0;
+
         if (onScoreUpdateRef.current) onScoreUpdateRef.current(0);
         loop();
       } else if (gameState === 'GAME_OVER') {
@@ -157,7 +174,6 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameState]); 
 
-  // Input Handling
   useEffect(() => {
     const handleJump = () => {
       if (gameState === 'PLAYING') {
