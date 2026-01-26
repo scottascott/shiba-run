@@ -61,10 +61,10 @@ const CryptoShibaRun = () => {
                     border: '1px solid #333'
                 }}>
                     <p style={{
-                        color: '#6E57FE', 
+                        color: '#D5CEFF', 
                         margin: 0, 
                         fontSize: '20px', // This stays BIG on mobile!
-                        fontWeight: 'bold',
+                        fontWeight: 'normal',
                         letterSpacing: '1px'
                     }}>
                         ₿ {liveScore}
@@ -132,14 +132,14 @@ const CryptoShibaRun = () => {
                         >
                             <div style={{ textAlign: "center" }}>
                                 <p style={{ color: "#888", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>PORTFOLIO VALUE</p>
-                                <p style={{ color: "#fff", fontSize: "20px", margin: 0, fontWeight: "bold" }}>₿ {score}</p>
+                                <p style={{ color: "#fff", fontSize: "20px", margin: 0, fontWeight: "normal" }}>₿ {score}</p>
                             </div>
 
                             <div style={{ width: "1px", height: "40px", backgroundColor: "#333" }}></div>
 
                             <div style={{ textAlign: "center" }}>
                                 <p style={{ color: "#fbbf24", margin: "0 0 5px 0", fontSize: "10px", letterSpacing: "1px" }}>MY RECORD</p>
-                                <p style={{ color: "#fbbf24", fontSize: "20px", margin: 0, fontWeight: "bold" }}>₿ {highScore}</p>
+                                <p style={{ color: "#fbbf24", fontSize: "20px", margin: 0, fontWeight: "normal" }}>₿ {highScore}</p>
                             </div>
                         </div>
 

@@ -8,5 +8,13 @@ export const GROUND_Y = 250;
 // New Constants for Collision
 export const SHIBA_WIDTH = 36;
 export const SHIBA_HEIGHT = 50;
-export const OBSTACLE_WIDTH = 20;
-export const OBSTACLE_HEIGHT = 40;
+
+// export const OBSTACLE_WIDTH = 20;
+// export const OBSTACLE_HEIGHT = 40;
+
+export const OBSTACLE_TYPES = [
+    { name: "CANDLE1", width: 14, height: 52 }, 
+    { name: "CANDLE2", width: 22, height: 46 }, 
+    { name: "CANDLE3", width: 30, height: 52 }, 
+    { name: "FISHER", width: 40, height: 56 }, 
+];
