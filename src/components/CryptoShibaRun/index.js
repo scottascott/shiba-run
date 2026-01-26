@@ -31,7 +31,7 @@ const CryptoShibaRun = () => {
                 aspectRatio: "800/300",
                 position: "relative",
                 border: "1px solid #333",
-                backgroundColor: "#111",
+                backgroundColor: "#18304C",
                 margin: "0 auto",
                 overflow: "hidden",
                 fontFamily: '"Jersey 10", sans-serif', 
