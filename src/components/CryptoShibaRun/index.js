@@ -34,7 +34,7 @@ const CryptoShibaRun = () => {
                 backgroundColor: "#111",
                 margin: "0 auto",
                 overflow: "hidden",
-                fontFamily: "monospace",
+                fontFamily: '"Jersey 10", sans-serif', 
                 userSelect: "none",
                 display: "flex",
                 alignItems: "center",
@@ -61,7 +61,7 @@ const CryptoShibaRun = () => {
                     border: '1px solid #333'
                 }}>
                     <p style={{
-                        color: '#00ff00', 
+                        color: '#6E57FE', 
                         margin: 0, 
                         fontSize: '20px', // This stays BIG on mobile!
                         fontWeight: 'bold',
@@ -77,12 +77,12 @@ const CryptoShibaRun = () => {
             {gameState === "IDLE" && (
                 <div style={overlayStyle}>
                     <div style={cardStyle}>
-                        <h1 style={{ color: "#00ff00", fontSize: "clamp(20px, 5vw, 24px)", margin: 0 }}>CRYPTO SHIBA RUN</h1>
+                        <h1 style={{ color: "#6E57FE", fontSize: "clamp(24px, 6vw, 32px)", margin: 0 }}>CRYPTO SHIBA RUN</h1>
                         <p
                             style={{
                                 color: "#fff",
                                 marginTop: "10px",
-                                fontSize: "14px",
+                                fontSize: "18px",
                                 animation: "blink 1.5s infinite",
                             }}
                         >
@@ -95,7 +95,7 @@ const CryptoShibaRun = () => {
             {gameState === "GAME_OVER" && (
                 <div style={overlayStyle}>
                     <div style={cardStyle}>
-                        <h2 style={{ color: "#ff4444", fontSize: "clamp(24px, 6vw, 30px)", margin: 0 }}>GOOD JOB!</h2>
+                        <p style={{ color: "#ff4444", fontSize: "clamp(24px, 6vw, 30px)", margin: 0 }}>GOOD JOB!</p>
 
                         <div
                             style={{
@@ -186,13 +186,13 @@ const cardStyle = {
 
 const buttonStyle = {
     padding: "12px 20px",
-    fontSize: "16px",
+    fontFamily: '"Jersey 10", sans-serif', 
+    fontSize: "20px",
     cursor: "pointer",
-    backgroundColor: "#00ff00",
-    color: "#000",
+    backgroundColor: "#6E57FE",
+    color: "#fff",
     border: "none",
     borderRadius: "6px",
-    fontWeight: "bold",
     marginTop: "10px",
     width: "100%",
     textTransform: "uppercase",

@@ -91,6 +91,9 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
     const draw = () => {
       ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
+      // font
+      ctx.font = '24px "Jersey 10"';
+      
       // --- MOVING FLOOR ---
       ctx.beginPath();
       ctx.moveTo(0, GROUND_Y);
