@@ -13,7 +13,7 @@ function App() {
     return (
         <div style={{ display: "flex", justifyContent: "center", paddingTop: "50px" }}>
             <CryptoShibaRun />
-            <div>
+            {/* <div>
                 <input
                     type="file"
                     accept="image/*"
@@ -25,7 +25,7 @@ function App() {
                         console.log(base64);
                     }}
                 />
-            </div>
+            </div> */}
         </div>
     );
 }

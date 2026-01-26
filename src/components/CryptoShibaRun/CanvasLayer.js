@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
-import { GAME_WIDTH, GAME_HEIGHT, GRAVITY, JUMP_STRENGTH, GAME_SPEED_START, GROUND_Y, SHIBA_WIDTH, SHIBA_HEIGHT, OBSTACLE_TYPES } from "./Constants";
-import { SHIBA_SPRITESHEET, CANDLE1, CANDLE2, CANDLE3, FISHER } from "./Assets";
+import { GAME_WIDTH, GAME_HEIGHT, GRAVITY, JUMP_STRENGTH, GAME_SPEED_START, GROUND_Y, SHIBA_WIDTH, SHIBA_HEIGHT, OBSTACLE_TYPES, BG_SPEED_MODIFIER } from "./Constants";
+import { SHIBA_SPRITESHEET, CANDLE1, CANDLE2, CANDLE3, FISHER, BG_IMAGE_SRC } from "./Assets";
 import { addInputListener } from "./utils/inputManager";
 
 const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => {
@@ -26,6 +26,9 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
     const obsCandleSprite2 = useRef(null);
     const obsCandleSprite3 = useRef(null);
     const obsFisherSprite = useRef(null);
+    // Background State
+    const bgOffset = useRef(0);
+    const bgSprite = useRef(null);
 
     const onScoreUpdateRef = useRef(onScoreUpdate);
     useEffect(() => {
@@ -71,8 +74,22 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
                 }
             }
 
-            // 3. Ground
+            // 3. Ground & bg
             groundOffset.current += gameSpeed.current;
+            bgOffset.current += gameSpeed.current * BG_SPEED_MODIFIER;
+            if (bgSprite.current) {
+              // 1. Move Background
+              bgOffset.current += gameSpeed.current * BG_SPEED_MODIFIER;
+              
+              // 2. Calculate the scaled width to know when to loop
+              const scale = GAME_HEIGHT / bgSprite.current.height;
+              const scaledWidth = bgSprite.current.width * scale;
+      
+              // 3. Reset Loop using Scaled Width
+              if (bgOffset.current > scaledWidth) {
+                 bgOffset.current -= scaledWidth;
+              }
+            }
 
             // 4. Score
             score.current += 1;
@@ -106,6 +123,25 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
         const draw = () => {
             ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
+
+            // DRAW BACKGROUND (Parallax Loop) ---
+            if (bgSprite.current) {
+              // 1. Calculate Scale to fit Height perfectly
+              const scale = GAME_HEIGHT / bgSprite.current.height;
+              const scaledWidth = bgSprite.current.width * scale;
+      
+              // 2. Calculate Position
+              // We use modulo with scaledWidth
+              const xPos = -(bgOffset.current % scaledWidth);
+      
+              // 3. Draw First Copy (Using scaledWidth)
+              ctx.drawImage(bgSprite.current, xPos, 0, scaledWidth, GAME_HEIGHT);
+              
+              // 4. Draw Second Copy (if needed to fill screen)
+              if (xPos + scaledWidth < GAME_WIDTH) {
+                 ctx.drawImage(bgSprite.current, xPos + scaledWidth, 0, scaledWidth, GAME_HEIGHT);
+              }
+            }
             // --- Floor ---
             ctx.beginPath();
             ctx.moveTo(0, GROUND_Y);
@@ -117,8 +153,7 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
             ctx.stroke();
             ctx.lineDashOffset = 0;
             ctx.setLineDash([]);
-
-            // --- NEW: Draw Correct Obstacle Sprite ---
+            // --- Draw Correct Obstacle Sprite ---
             const type = obstacleType.current;
             let spriteToDraw = null;
 
@@ -173,12 +208,13 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
         const init = async () => {
             // Load ALL assets in parallel
             try {
-                const [shiba, small, large, bear, fisher] = await Promise.all([
+                const [shiba, small, large, bear, fisher, bg] = await Promise.all([
                     !shibaSprite.current ? loadImage(SHIBA_SPRITESHEET) : shibaSprite.current,
                     !obsCandleSprite1.current ? loadImage(CANDLE1) : obsCandleSprite1.current,
                     !obsCandleSprite2.current ? loadImage(CANDLE2) : obsCandleSprite2.current,
                     !obsCandleSprite3.current ? loadImage(CANDLE3) : obsCandleSprite3.current,
                     !obsFisherSprite.current ? loadImage(FISHER) : obsFisherSprite.current,
+                    !bgSprite.current ? loadImage(BG_IMAGE_SRC) : bgSprite.current,
                 ]);
 
                 shibaSprite.current = shiba;
@@ -186,6 +222,7 @@ const CanvasLayer = ({ gameState, setGameState, onGameOver, onScoreUpdate }) => 
                 obsCandleSprite2.current = large;
                 obsCandleSprite3.current = bear;
                 obsFisherSprite.current = fisher;
+                bgSprite.current = bg;
             } catch (e) {
                 console.warn("Asset load failed", e);
             }
