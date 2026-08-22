@@ -11,9 +11,10 @@ function imageFileToBase64(file) {
 }
 function App() {
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-            <CryptoShibaRun />
-            {/* <div>
+        <>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <CryptoShibaRun />
+                {/* <div>
                 <input
                     type="file"
                     accept="image/*"
@@ -26,8 +27,9 @@ function App() {
                     }}
                 />
             </div> */}
+            </div>
             <p style={{ textAlign: "center" }}>@2026 Scott Wang</p>
-        </div>
+        </>
     );
 }
 
